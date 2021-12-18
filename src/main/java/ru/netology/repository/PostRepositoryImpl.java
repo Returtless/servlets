@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
+
 public class PostRepositoryImpl implements PostRepository {
     private final List<Post> allPosts;
     private final AtomicLong counterId;
