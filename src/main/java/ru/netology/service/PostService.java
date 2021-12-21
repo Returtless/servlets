@@ -1,11 +1,14 @@
 package ru.netology.service;
 
+import org.springframework.stereotype.Service;
 import ru.netology.exception.NotFoundException;
 import ru.netology.model.Post;
 import ru.netology.repository.PostRepository;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+@Service
 public class PostService {
     private final PostRepository repository;
 
@@ -13,8 +16,8 @@ public class PostService {
         this.repository = repository;
     }
 
-    public Map<Long, Post> all() {
-        return repository.all();
+    public List<Post> all() {
+        return new ArrayList<>(repository.all().values());
     }
 
     public Post getById(long id) {
