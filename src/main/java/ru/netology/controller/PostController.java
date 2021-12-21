@@ -7,6 +7,7 @@ import ru.netology.service.PostService;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 
 public class PostController {
   public static final String APPLICATION_JSON = "application/json";
@@ -19,7 +20,7 @@ public class PostController {
 
   public void all(HttpServletResponse response) throws IOException {
     setResponseContentType(response);
-    response.getWriter().print(gson.toJson(service.all()));
+    response.getWriter().print(gson.toJson(new ArrayList<>(service.all().values())));
   }
 
   public void getById(long id, HttpServletResponse response) throws IOException {

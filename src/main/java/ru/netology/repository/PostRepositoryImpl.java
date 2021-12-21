@@ -2,26 +2,26 @@ package ru.netology.repository;
 
 import ru.netology.model.Post;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class PostRepositoryImpl implements PostRepository {
-    private final List<Post> allPosts;
+    private final Map<Long, Post> allPosts;
     private final AtomicLong counterId;
 
     public PostRepositoryImpl() {
-        this.allPosts = new CopyOnWriteArrayList<>();
+        this.allPosts = new ConcurrentHashMap<>();
         counterId = new AtomicLong(0);
     }
 
-    public List<Post> all() {
+    public Map<Long, Post> all() {
         return allPosts;
     }
 
     public Optional<Post> getById(long id) {
-        return allPosts.stream().filter(post -> post.getId() == id).findFirst();
+        return Optional.ofNullable(allPosts.get(id));
     }
 
     public Post save(Post post) {
@@ -42,12 +42,12 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     public void removeById(long id) {
-        allPosts.removeIf(post -> post.getId() == id);
+        allPosts.remove(id);
     }
 
     private Post saveNewPost(Post post) {
         post.setId(counterId.incrementAndGet());
-        allPosts.add(post);
+        allPosts.put(post.getId(), post);
         return post;
     }
 }
