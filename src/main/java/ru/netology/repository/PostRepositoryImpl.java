@@ -1,12 +1,16 @@
 package ru.netology.repository;
 
+import org.springframework.stereotype.Repository;
+import ru.netology.exception.NotFoundException;
 import ru.netology.model.Post;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
+@Repository
 public class PostRepositoryImpl implements PostRepository {
     private final Map<Long, Post> allPosts;
     private final AtomicLong counterId;
@@ -17,11 +21,21 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     public Map<Long, Post> all() {
-        return allPosts;
+        return allPosts.entrySet().stream()
+                .filter(x -> !x.getValue().isRemoved())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Optional<Post> getById(long id) {
-        return Optional.ofNullable(allPosts.get(id));
+    public Post getById(long id) {
+        Optional<Post> post = Optional.ofNullable(allPosts.get(id));
+        if (post.isPresent()) {
+            if (post.get().isRemoved()) {
+                throw new NotFoundException("Пост удален");
+            }
+            return post.get();
+        } else {
+            throw new NotFoundException("Пост не существует");
+        }
     }
 
     public Post save(Post post) {
@@ -30,19 +44,14 @@ public class PostRepositoryImpl implements PostRepository {
         if (postId == 0) {
             return saveNewPost(post);
         } else {
-            Optional<Post> optionalEditedPost = getById(postId);
-            if (optionalEditedPost.isPresent()) {
-                Post editedPost = optionalEditedPost.get();
-                editedPost.setContent(post.getContent());
-                return editedPost;
-            } else {
-                return saveNewPost(post);
-            }
+            Post editedPost = getById(postId);
+            editedPost.setContent(post.getContent());
+            return editedPost;
         }
     }
 
     public void removeById(long id) {
-        allPosts.remove(id);
+        allPosts.get(id).setRemoved();
     }
 
     private Post saveNewPost(Post post) {

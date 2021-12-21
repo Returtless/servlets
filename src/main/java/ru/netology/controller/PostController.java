@@ -1,45 +1,38 @@
 package ru.netology.controller;
 
-import com.google.gson.Gson;
+import org.springframework.web.bind.annotation.*;
 import ru.netology.model.Post;
 import ru.netology.service.PostService;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
+import java.util.List;
 
+@RestController
+@RequestMapping("/api/posts")
 public class PostController {
-  public static final String APPLICATION_JSON = "application/json";
-  private final PostService service;
-  private final Gson gson = new Gson();
+    private final PostService service;
 
-  public PostController(PostService service) {
-    this.service = service;
-  }
+    public PostController(PostService service) {
+        this.service = service;
+    }
 
-  public void all(HttpServletResponse response) throws IOException {
-    setResponseContentType(response);
-    response.getWriter().print(gson.toJson(new ArrayList<>(service.all().values())));
-  }
+    @GetMapping
+    public List<Post> all() {
+        return service.all();
+    }
 
-  public void getById(long id, HttpServletResponse response) throws IOException {
-    setResponseContentType(response);
-    response.getWriter().print(gson.toJson(service.getById(id)));
-  }
+    @GetMapping("/{id}")
+    public Post getById(@PathVariable long id) {
+        return service.getById(id);
+    }
 
-  public void save(Reader body, HttpServletResponse response) throws IOException {
-    setResponseContentType(response);
-    final var post = gson.fromJson(body, Post.class);
-    response.getWriter().print(gson.toJson(service.save(post)));
-  }
+    @PostMapping
+    public Post save(@RequestBody Post post) {
+        return service.save(post);
+    }
 
-  public void removeById(long id, HttpServletResponse response) {
-    setResponseContentType(response);
-    service.removeById(id);
-  }
-
-  private void setResponseContentType(HttpServletResponse response){
-    response.setContentType(APPLICATION_JSON);
-  }
+    @DeleteMapping("/{id}")
+    public void removeById(@PathVariable long id) {
+        service.removeById(id);
+    }
 }
+
